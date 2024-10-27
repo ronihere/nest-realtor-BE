@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+
+model User {
+  id                    String       @id @default(uuid())
+  email                 String       @unique
+  name                  String
+  password              String
+  type                  USERTYPE     @default(BUYER)
+  Homes                 Home[]
+  buyer_messages        Message[] @relation("buyer_message")
+  realtor_messages      Message[]  @relation("realtor_message")
+}
+
+model Home {
+  id                    String       @id @default(uuid())
+  address               String
+  number_of_bedrooms    Int
+  number_of_bathrooms   Int 
+  authorId              Int
+  listed_date           DateTime     @default(now())
+  type                  PROPERTYTYPE
+  buy_type              BUYCATEGORY
+  price Float
+  land_size Float
+  city String
+  created_at            DateTime @default(now())
+  updated_at            DateTime @default(now())
+  user_id               String
+  user                  User @relation(fields: [user_id],references: [id]) 
+  images                Image[]
+  messages              Message[]
+}
+
+model Image {
+  id                    String @id @default(uuid())
+  home_id               String
+  home                  Home @relation(fields: [home_id], references: [id])
+  url                   String
+  description           String
+}
+
+model Message {
+  id                    String @id @default(uuid())
+  home_id               String
+  home                  Home @relation(fields: [home_id], references: [id])
+  buyer_id              String
+  realtor_id            String
+  buyer                 User @relation("buyer_message",fields: [buyer_id], references: [id])
+  realtor               User @relation("realtor_message",fields: [realtor_id], references: [id])
+
+}
+
+enum PROPERTYTYPE {
+  RESIDENTIAL
+  CONDO
+}
+
+enum BUYCATEGORY {
+  LEASE
+  RENT
+  BUY
+}
+
+enum USERTYPE  {
+   BUYER
+   ADMIN
+   REALTOR
+}

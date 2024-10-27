@@ -17,3 +17,13 @@ export class TSignUpDto {
 
     userType?: USERTYPE 
 }
+
+
+export class TSignInDto {
+    @IsEmail()
+    email: string
+
+    @IsString()
+    @IsNotEmpty()
+    password: string
+}

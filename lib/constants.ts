@@ -1,0 +1,1 @@
+export const defaultTokenExpiryTime = 36000000

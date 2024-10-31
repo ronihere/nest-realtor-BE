@@ -1,5 +1,5 @@
 import { USERTYPE } from "@prisma/client";
-import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
 
 export class TSignUpDto {
     @IsString()
@@ -16,4 +16,26 @@ export class TSignUpDto {
     password: string
 
     userType?: USERTYPE 
+
+    @IsOptional()
+    productkey?: string
+}
+
+
+export class TSignInDto {
+    @IsEmail()
+    email: string
+
+    @IsString()
+    @IsNotEmpty()
+    password: string
+}
+
+
+export class TProductKeyDto{
+    @IsEmail()
+    email: string
+
+    @IsEnum(USERTYPE)
+    type: USERTYPE
 }

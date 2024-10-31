@@ -1,8 +1,8 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-service/prisma-service.service';
 import { USERTYPE } from '@prisma/client';
 import * as bcrypt from "bcryptjs"
-import { TSignInDto, TSignUpDto } from './dtos/auth.dtos';
+import { TProductKeyDto, TSignInDto, TSignUpDto } from './dtos/auth.dtos';
 import { defaultTokenExpiryTime } from 'lib/constants';
 import * as jwt from "jsonwebtoken"
 
@@ -57,5 +57,16 @@ export class AuthService {
 
     async createJwt(payload: Record<string,any>, expiresIn?: number){
         return jwt.sign(payload , process.env.JWT_SECRET , {expiresIn : expiresIn ?? defaultTokenExpiryTime})
+    }
+
+    async getProductKey({email, type}: TProductKeyDto){
+        const user = await this.PrismaService.user.findUnique({
+            where: {email}
+        })
+        if(!user){
+            throw new NotFoundException();
+        }
+        const productKeytemplate = `${email}-${type}-${process.env.GENERATE_PRODUCT_KEY_SECRET}`
+        return bcrypt.hash(productKeytemplate, 10);
     }
 }

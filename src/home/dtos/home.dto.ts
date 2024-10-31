@@ -1,5 +1,5 @@
 import { BUYCATEGORY, PROPERTYTYPE } from "@prisma/client";
-import { Exclude, Expose, Transform, Type } from "class-transformer";
+import { Exclude, Expose, Type } from "class-transformer";
 import { IsArray, IsEnum, IsNotEmpty,  IsNumber, IsOptional, IsPositive, IsString,  IsUrl,  ValidateNested } from "class-validator";
 
 export class HomeResponseDto {
@@ -114,6 +114,46 @@ export class CreateHomeDto{
 
     @IsEnum(BUYCATEGORY)
     buyType: BUYCATEGORY
+}
+
+export class UpdateHomeDto{
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    address?: string;
+
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    landSize?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    numberOfBathrooms?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    numberOfBedrooms?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    price?: number;
+
+    @IsOptional()
+    @IsEnum(PROPERTYTYPE)
+    type?: PROPERTYTYPE
+
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    city?: string
+
+    @IsOptional()
+    @IsEnum(BUYCATEGORY)
+    buyType?: BUYCATEGORY
 }
 
 export interface HomeFilters {

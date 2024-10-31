@@ -1,29 +1,30 @@
-import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseIntPipe, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseIntPipe, ParseUUIDPipe, Post, Put, Query, UnauthorizedException } from '@nestjs/common';
 import { HomeService } from './home.service';
-import { CreateHomeDto, HomeFilters, HomeSearchQueryDto } from './dtos/home.dto';
+import { CreateHomeDto, HomeFilters, HomeSearchQueryDto, UpdateHomeDto } from './dtos/home.dto';
 import { PROPERTYTYPE } from '@prisma/client';
 import { CustomTransformerPipe, parseToInt } from './customValidationPipe/CustomValidationPipe';
+import { User } from 'src/Decorators/User.Decorator';
+import { TokenUserInterface } from 'src/GlobalInterceptor/Userinterceptor.Interceptor';
 
 @Controller('home')
 export class HomeController {
     constructor(private readonly homeService : HomeService){}
     @Get()
     async getAllHomes(
-        @Query('maxPrice', new CustomTransformerPipe(parseToInt)) maxPrice: number,
-        @Query('minPrice', new CustomTransformerPipe(parseToInt)) minPrice: number,
-        @Query('numberOfBedrooms', new CustomTransformerPipe(parseToInt)) numberOfBedrooms: number,
-        @Query('numberOfBathrooms',new CustomTransformerPipe(parseToInt)) numberOfBathrooms : number,
+        @Query('maxPrice', new CustomTransformerPipe(parseToInt,true)) maxPrice: number,
+        @Query('minPrice', new CustomTransformerPipe(parseToInt,true)) minPrice: number,
+        @Query('numberOfBedrooms', new CustomTransformerPipe(parseToInt,true)) numberOfBedrooms: number,
+        @Query('numberOfBathrooms',new CustomTransformerPipe(parseToInt,true)) numberOfBathrooms : number,
         @Query('type') type : PROPERTYTYPE,
-        @Query('city') city : string
+        @Query('city') city : string,
     ){
-        console.log({maxPrice, minPrice, numberOfBathrooms, numberOfBedrooms})
         const priceFilter = minPrice || maxPrice ? 
         {
             ...(minPrice && {gte : minPrice}),
             ...(maxPrice && {lte: maxPrice})
         }
         : 
-        null
+        null;
 
         const filter: HomeFilters = {
             ...(city && {city}),
@@ -41,17 +42,20 @@ export class HomeController {
     }
 
     @Post()
-    async createHome(@Body() createHomepayload : CreateHomeDto){
-        return this.homeService.createHome(createHomepayload);
+    async createHome(@Body() createHomepayload : CreateHomeDto, @User() loggedInUser : TokenUserInterface){
+        if(loggedInUser.type !== 'REALTOR'){
+            throw new UnauthorizedException({message:"Only a REALTOR user can post a new property."})
+        }
+        return this.homeService.createHome(createHomepayload, loggedInUser);
     }
 
-    @Put()
-    async updateHome(){
-        return this.homeService.updateHome();
+    @Put(":id")
+    async updateHome(@Param('id', ParseUUIDPipe) id : string,@Body() updateHomepayload :UpdateHomeDto,  @User() loggedInUser: TokenUserInterface){
+        return this.homeService.updateHome(id , updateHomepayload, loggedInUser.id);
     }
 
     @Delete(':id')
-    async deleteHome(){
-        return this.homeService.deleteHome();
+    async deleteHome(@Param('id', ParseUUIDPipe) id : string, @User() loggedInUser: TokenUserInterface){
+        return this.homeService.deleteHome(id, loggedInUser.id);
     }
 }

@@ -32,7 +32,6 @@ model Home {
   address               String
   number_of_bedrooms    Int
   number_of_bathrooms   Int 
-  authorId              Int
   listed_date           DateTime     @default(now())
   type                  PROPERTYTYPE
   buy_type              BUYCATEGORY

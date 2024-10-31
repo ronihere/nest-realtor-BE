@@ -67,7 +67,7 @@ export class HomeService {
                 user_id: "b1d7e532-31cd-42ba-8dc3-cd446ffa0f99"
             }
         })
-        const newLyCreateImages = await this.prismaService.image.createMany({
+        await this.prismaService.image.createMany({
             data: images?.map(image => {
                 return {
                     url: image.url,
@@ -85,10 +85,15 @@ export class HomeService {
             throw new NotFoundException()
         }
         const updatedhome = await this.prismaService.home.update({data,where:{id}})
-        console.log({updatedhome})
-        return updatedhome
+        return new HomeResponseDto(updatedhome)
     }
 
-    async deleteHome() {
+    async deleteHome(id: string) {
+        const tobeDeletedHome = await this.prismaService.home.findUnique({where:{id}});
+        if(!tobeDeletedHome){
+            throw new NotFoundException();
+        }
+        await this.prismaService.home.delete({where:{id}});
+        return;
     }
 }

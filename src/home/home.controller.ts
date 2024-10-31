@@ -23,7 +23,7 @@ export class HomeController {
             ...(maxPrice && {lte: maxPrice})
         }
         : 
-        null
+        null;
 
         const filter: HomeFilters = {
             ...(city && {city}),
@@ -51,7 +51,7 @@ export class HomeController {
     }
 
     @Delete(':id')
-    async deleteHome(){
-        return this.homeService.deleteHome();
+    async deleteHome(@Param('id', ParseUUIDPipe) id : string){
+        return this.homeService.deleteHome(id);
     }
 }

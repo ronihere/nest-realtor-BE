@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseIntPipe, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { HomeService } from './home.service';
-import { CreateHomeDto, HomeFilters, HomeSearchQueryDto } from './dtos/home.dto';
+import { CreateHomeDto, HomeFilters, HomeSearchQueryDto, UpdateHomeDto } from './dtos/home.dto';
 import { PROPERTYTYPE } from '@prisma/client';
 import { CustomTransformerPipe, parseToInt } from './customValidationPipe/CustomValidationPipe';
 
@@ -45,9 +45,9 @@ export class HomeController {
         return this.homeService.createHome(createHomepayload);
     }
 
-    @Put()
-    async updateHome(){
-        return this.homeService.updateHome();
+    @Put(":id")
+    async updateHome(@Param('id', ParseUUIDPipe) id : string,@Body() updateHomepayload :UpdateHomeDto){
+        return this.homeService.updateHome(id , updateHomepayload);
     }
 
     @Delete(':id')

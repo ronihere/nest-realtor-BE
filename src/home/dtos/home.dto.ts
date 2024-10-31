@@ -116,6 +116,46 @@ export class CreateHomeDto{
     buyType: BUYCATEGORY
 }
 
+export class UpdateHomeDto{
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    address?: string;
+
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    landSize?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    numberOfBathrooms?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    numberOfBedrooms?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    price?: number;
+
+    @IsOptional()
+    @IsEnum(PROPERTYTYPE)
+    type?: PROPERTYTYPE
+
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    city?: string
+
+    @IsOptional()
+    @IsEnum(BUYCATEGORY)
+    buyType?: BUYCATEGORY
+}
+
 export interface HomeFilters {
     city?: string
     number_of_bedrooms?: number;

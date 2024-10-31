@@ -1,5 +1,6 @@
-import { Controller, Delete, Get, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { HomeService } from './home.service';
+import { CreateHomeDto } from './dtos/home.dto';
 
 @Controller('home')
 export class HomeController {
@@ -10,13 +11,13 @@ export class HomeController {
     }
 
     @Get(':id')
-    async getHomeById(){
-        return this.homeService.getHomeById();
+    async getHomeById(@Param('id', ParseUUIDPipe) id : string){
+        return this.homeService.getHomeById(id);
     }
 
     @Post()
-    async createHome(){
-        return this.homeService.createHome();
+    async createHome(@Body() createHomepayload : CreateHomeDto){
+        return this.homeService.createHome(createHomepayload);
     }
 
     @Put()

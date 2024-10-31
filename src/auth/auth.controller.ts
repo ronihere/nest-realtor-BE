@@ -30,7 +30,7 @@ export class AuthController {
 
     @Get('/key')
     getProductKey(@Body() {email,type} : TProductKeyDto){
-        const productKeytemplate = `${email}-${type}-${process.env.GENERATE_PRODUCT_KEY_SECRET}`
-        return bcrypt.hash(productKeytemplate, 10);
+        //TODO: later there should be a check to validate if the user that is requesting for the key is an Admin
+        return this.AuthService.getProductKey({email, type});
     }
 }

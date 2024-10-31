@@ -1,8 +1,10 @@
-import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseIntPipe, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseIntPipe, ParseUUIDPipe, Post, Put, Query, UnauthorizedException } from '@nestjs/common';
 import { HomeService } from './home.service';
 import { CreateHomeDto, HomeFilters, HomeSearchQueryDto, UpdateHomeDto } from './dtos/home.dto';
 import { PROPERTYTYPE } from '@prisma/client';
 import { CustomTransformerPipe, parseToInt } from './customValidationPipe/CustomValidationPipe';
+import { User } from 'src/Decorators/User.Decorator';
+import { TokenUserInterface } from 'src/GlobalInterceptor/Userinterceptor.Interceptor';
 
 @Controller('home')
 export class HomeController {
@@ -14,9 +16,8 @@ export class HomeController {
         @Query('numberOfBedrooms', new CustomTransformerPipe(parseToInt,true)) numberOfBedrooms: number,
         @Query('numberOfBathrooms',new CustomTransformerPipe(parseToInt,true)) numberOfBathrooms : number,
         @Query('type') type : PROPERTYTYPE,
-        @Query('city') city : string
+        @Query('city') city : string,
     ){
-        console.log({maxPrice, minPrice, numberOfBathrooms, numberOfBedrooms})
         const priceFilter = minPrice || maxPrice ? 
         {
             ...(minPrice && {gte : minPrice}),
@@ -41,17 +42,20 @@ export class HomeController {
     }
 
     @Post()
-    async createHome(@Body() createHomepayload : CreateHomeDto){
-        return this.homeService.createHome(createHomepayload);
+    async createHome(@Body() createHomepayload : CreateHomeDto, @User() loggedInUser : TokenUserInterface){
+        if(loggedInUser.type !== 'REALTOR'){
+            throw new UnauthorizedException({message:"Only a REALTOR user can post a new property."})
+        }
+        return this.homeService.createHome(createHomepayload, loggedInUser);
     }
 
     @Put(":id")
-    async updateHome(@Param('id', ParseUUIDPipe) id : string,@Body() updateHomepayload :UpdateHomeDto){
-        return this.homeService.updateHome(id , updateHomepayload);
+    async updateHome(@Param('id', ParseUUIDPipe) id : string,@Body() updateHomepayload :UpdateHomeDto,  @User() loggedInUser: TokenUserInterface){
+        return this.homeService.updateHome(id , updateHomepayload, loggedInUser.id);
     }
 
     @Delete(':id')
-    async deleteHome(@Param('id', ParseUUIDPipe) id : string){
-        return this.homeService.deleteHome(id);
+    async deleteHome(@Param('id', ParseUUIDPipe) id : string, @User() loggedInUser: TokenUserInterface){
+        return this.homeService.deleteHome(id, loggedInUser.id);
     }
 }

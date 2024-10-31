@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-service/prisma-service.service';
-import { CreateHomeDto, HomeResponseDto } from './dtos/home.dto';
-const selectHomeQuery = {address: true,
+import { CreateHomeDto, HomeFilters, HomeResponseDto } from './dtos/home.dto';
+const selectHomeQuery = {
+    address: true,
     buy_type: true,
     city: true,
     listed_date: true,
@@ -13,35 +14,38 @@ const selectHomeQuery = {address: true,
     price: true,
     type: true,
     updated_at: true,
-    user_id: true,}
+    user_id: true,
+}
 @Injectable()
 export class HomeService {
-    constructor(private readonly prismaService: PrismaService){}
-    async getHomes(){
+    constructor(private readonly prismaService: PrismaService) { }
+    async getHomes(filter: HomeFilters) {
         const homes = await this.prismaService.home.findMany({
-            select:{
-                ...selectHomeQuery,
-                images:{
-                select:{
-                    url: true,
-                },
-                take: 1
-            }}
-        });
-        return homes.map(home =>{
-        const imageUrl = home.images?.[0]?.url || "";
-        delete home.images;
-        return new HomeResponseDto({...home, image: imageUrl})
-    });
-    }
-
-    async getHomeById(id: string){
-        return new HomeResponseDto( await this.prismaService.home.findUnique({
-            where:{id},
-            select:{
+            select: {
                 ...selectHomeQuery,
                 images: {
-                    select:{
+                    select: {
+                        url: true,
+                    },
+                    take: 1,
+                },
+            },
+            where: filter
+        });
+        return homes.map(home => {
+            const imageUrl = home.images?.[0]?.url || "";
+            delete home.images;
+            return new HomeResponseDto({ ...home, image: imageUrl })
+        });
+    }
+
+    async getHomeById(id: string) {
+        return new HomeResponseDto(await this.prismaService.home.findUnique({
+            where: { id },
+            select: {
+                ...selectHomeQuery,
+                images: {
+                    select: {
                         url: true,
                     }
                 }
@@ -49,9 +53,9 @@ export class HomeService {
         }))
     }
 
-    async createHome({address,buyType,city,images,landSize,numberOfBathrooms,numberOfBedrooms,price,type}: CreateHomeDto){
+    async createHome({ address, buyType, city, images, landSize, numberOfBathrooms, numberOfBedrooms, price, type }: CreateHomeDto) {
         const newHome = await this.prismaService.home.create({
-            data:{
+            data: {
                 address,
                 buy_type: buyType,
                 city,
@@ -64,18 +68,20 @@ export class HomeService {
             }
         })
         const newLyCreateImages = await this.prismaService.image.createMany({
-            data: images?.map(image =>{return {
-                url: image.url,
-                description: newHome.address + newHome.id,
-                home_id: newHome.id
-            }})
+            data: images?.map(image => {
+                return {
+                    url: image.url,
+                    description: newHome.address + newHome.id,
+                    home_id: newHome.id
+                }
+            })
         })
-        return new HomeResponseDto({...newHome, image: images[0].url});
+        return new HomeResponseDto({ ...newHome, image: images[0].url });
     }
 
-    async updateHome(){
+    async updateHome() {
     }
 
-    async deleteHome(){
+    async deleteHome() {
     }
 }

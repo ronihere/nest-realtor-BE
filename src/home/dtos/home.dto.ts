@@ -1,6 +1,6 @@
 import { BUYCATEGORY, PROPERTYTYPE } from "@prisma/client";
-import { Exclude, Expose, Type } from "class-transformer";
-import { IsArray, IsEnum, IsNotEmpty,  IsNumber, IsPositive, IsString,  IsUrl,  ValidateNested } from "class-validator";
+import { Exclude, Expose, Transform, Type } from "class-transformer";
+import { IsArray, IsEnum, IsNotEmpty,  IsNumber, IsOptional, IsPositive, IsString,  IsUrl,  ValidateNested } from "class-validator";
 
 export class HomeResponseDto {
     id: string;
@@ -16,7 +16,7 @@ export class HomeResponseDto {
     number_of_bathrooms: number;
     @Expose({name: "numberOfBathrooms"})
     numberOfBathrooms(){
-        return this.numberOfBathrooms;
+        return this.number_of_bathrooms;
     }
 
     image: string
@@ -115,3 +115,46 @@ export class CreateHomeDto{
     @IsEnum(BUYCATEGORY)
     buyType: BUYCATEGORY
 }
+
+export interface HomeFilters {
+    city?: string
+    number_of_bedrooms?: number;
+    number_of_bathrooms?: number;
+    type?:PROPERTYTYPE
+    price?:{
+        gte?: number;
+        lte?: number
+    }
+}
+
+
+export class HomeSearchQueryDto {
+    @IsOptional()
+    @IsPositive()
+    @IsNumber()
+    maxPrice?: number;
+  
+    @IsOptional()
+    @IsPositive()
+    @IsNumber()
+    minPrice?: number;
+  
+    @IsOptional()
+    @IsPositive()
+    @IsNumber()
+    numberOfBedrooms?: number;
+  
+    @IsOptional()
+    @IsPositive()
+    @IsNumber()
+    numberOfBathrooms?: number;
+  
+    @IsOptional()
+    @IsEnum(PROPERTYTYPE)
+    type?: PROPERTYTYPE;
+  
+    @IsOptional()
+    @IsString()
+    city?: string;
+  }
+  

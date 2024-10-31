@@ -1,13 +1,38 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseIntPipe, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { HomeService } from './home.service';
-import { CreateHomeDto } from './dtos/home.dto';
+import { CreateHomeDto, HomeFilters, HomeSearchQueryDto } from './dtos/home.dto';
+import { PROPERTYTYPE } from '@prisma/client';
+import { CustomTransformerPipe, parseToInt } from './customValidationPipe/CustomValidationPipe';
 
 @Controller('home')
 export class HomeController {
     constructor(private readonly homeService : HomeService){}
     @Get()
-    async (){
-        return this.homeService.getHomes();
+    async getAllHomes(
+        @Query('maxPrice', new CustomTransformerPipe(parseToInt)) maxPrice: number,
+        @Query('minPrice', new CustomTransformerPipe(parseToInt)) minPrice: number,
+        @Query('numberOfBedrooms', new CustomTransformerPipe(parseToInt)) numberOfBedrooms: number,
+        @Query('numberOfBathrooms',new CustomTransformerPipe(parseToInt)) numberOfBathrooms : number,
+        @Query('type') type : PROPERTYTYPE,
+        @Query('city') city : string
+    ){
+        console.log({maxPrice, minPrice, numberOfBathrooms, numberOfBedrooms})
+        const priceFilter = minPrice || maxPrice ? 
+        {
+            ...(minPrice && {gte : minPrice}),
+            ...(maxPrice && {lte: maxPrice})
+        }
+        : 
+        null
+
+        const filter: HomeFilters = {
+            ...(city && {city}),
+            ...(priceFilter && {price: priceFilter}),
+            ...(type && {type}),
+            ...(numberOfBedrooms && {number_of_bedrooms: numberOfBedrooms}),
+            ...(numberOfBathrooms && {number_of_bathrooms: numberOfBathrooms}),
+        }
+        return this.homeService.getHomes(filter);
     }
 
     @Get(':id')

@@ -9,10 +9,10 @@ export class HomeController {
     constructor(private readonly homeService : HomeService){}
     @Get()
     async getAllHomes(
-        @Query('maxPrice', new CustomTransformerPipe(parseToInt)) maxPrice: number,
-        @Query('minPrice', new CustomTransformerPipe(parseToInt)) minPrice: number,
-        @Query('numberOfBedrooms', new CustomTransformerPipe(parseToInt)) numberOfBedrooms: number,
-        @Query('numberOfBathrooms',new CustomTransformerPipe(parseToInt)) numberOfBathrooms : number,
+        @Query('maxPrice', new CustomTransformerPipe(parseToInt,true)) maxPrice: number,
+        @Query('minPrice', new CustomTransformerPipe(parseToInt,true)) minPrice: number,
+        @Query('numberOfBedrooms', new CustomTransformerPipe(parseToInt,true)) numberOfBedrooms: number,
+        @Query('numberOfBathrooms',new CustomTransformerPipe(parseToInt,true)) numberOfBathrooms : number,
         @Query('type') type : PROPERTYTYPE,
         @Query('city') city : string
     ){

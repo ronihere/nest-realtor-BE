@@ -3,10 +3,10 @@ import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from
 @Injectable()
 export class   
  CustomTransformerPipe<T> implements PipeTransform<string, T> {
-  constructor(private transformFunction: (value: string) => T) {}
+  constructor(private transformFunction: (value: string) => T, private isOptional : boolean) {}
 
   transform(value: string, metadata: ArgumentMetadata): T {
-    if(!value){
+    if(!value && this.isOptional){
         // returns empty string if the value is not passed, good use case for validating optional Query Params
         return '' as T;
     }

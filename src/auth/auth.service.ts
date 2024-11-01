@@ -37,7 +37,8 @@ export class AuthService {
     }
 
     async signIn({email, password}: TSignInDto){
-        console.log('here')
+        console.log('in service signIn')
+
         const requestedEmailUser = await this.PrismaService.user.findUnique({
             where:{email}
         });

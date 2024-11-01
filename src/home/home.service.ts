@@ -41,7 +41,7 @@ export class HomeService {
     }
 
     async getHomeById(id: string) {
-        return new HomeResponseDto(await this.prismaService.home.findUnique({
+        const home = await this.prismaService.home.findUnique({
             where: { id },
             select: {
                 ...selectHomeQuery,
@@ -51,7 +51,11 @@ export class HomeService {
                     }
                 }
             }
-        }))
+        });
+        if(!home){
+            throw new NotFoundException()
+        }
+        return new HomeResponseDto(home);
     }
 
     async createHome({ address, buyType, city, images, landSize, numberOfBathrooms, numberOfBedrooms, price, type }: CreateHomeDto, loggedInUser: TokenUserInterface) {

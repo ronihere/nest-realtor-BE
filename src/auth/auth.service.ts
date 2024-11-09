@@ -37,17 +37,20 @@ export class AuthService {
     }
 
     async signIn({email, password}: TSignInDto){
-        console.log('in service signIn')
 
         const requestedEmailUser = await this.PrismaService.user.findUnique({
             where:{email}
         });
         if(!requestedEmailUser){
+        console.log('in service signIn')
+
             throw new BadRequestException({message:"Invalid credentials"});
         }
         const hashedPassword = requestedEmailUser.password;
         const isValidPasswordProvided = await bcrypt.compare(password , hashedPassword);
         if(!isValidPasswordProvided){
+        console.log('in service signIn')
+
             throw new BadRequestException({message:"Invalid credentials"})
         }
         delete requestedEmailUser.password

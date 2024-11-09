@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseEnumPipe, ParseIntPipe, ParseUUIDPipe, Post, Put, Query, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, FileTypeValidator, Get, MaxFileSizeValidator, Param, ParseEnumPipe, ParseFilePipe, ParseIntPipe, ParseUUIDPipe, Post, Put, Query, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { HomeService } from './home.service';
 import { CreateHomeDto, HomeFilters, HomeSearchQueryDto, UpdateHomeDto } from './dtos/home.dto';
 import { PROPERTYTYPE, USERTYPE } from '@prisma/client';
@@ -6,6 +6,7 @@ import { CustomTransformerPipe, parseToInt } from './customValidationPipe/Custom
 import { User } from 'src/Decorators/User.Decorator';
 import { TokenUserInterface } from 'src/GlobalInterceptor/Userinterceptor.Interceptor';
 import { Roles } from 'src/Decorators/Roles.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('home')
 export class HomeController {
@@ -39,6 +40,8 @@ export class HomeController {
         return this.homeService.getHomes(filter);
     }
 
+
+
     @Roles(USERTYPE.BUYER, USERTYPE.REALTOR, USERTYPE.ADMIN)    
     @Get(':id')
     async getHomeById(@Param('id', ParseUUIDPipe) id : string){
@@ -46,12 +49,27 @@ export class HomeController {
     }
 
     @Roles(USERTYPE.REALTOR)
+    @Post(':id/image')
+    @UseInterceptors(FileInterceptor('file'))
+    async upsertHomeImage(@Param('id', ParseUUIDPipe) homeId : string,@UploadedFile(new ParseFilePipe({
+        validators: [
+        //   new MaxFileSizeValidator({ maxSize: 1000 }),
+        //   new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+      })) file: Express.Multer.File){
+        console.log(file);
+        return this.homeService.upsertHomeImage(homeId,file.filename || file.originalname || 'emptyfilename', file.buffer);
+    }
+    @Roles(USERTYPE.REALTOR)
     @Post()
-    async createHome(@Body() createHomepayload : CreateHomeDto, @User() loggedInUser : TokenUserInterface){
+    @UseInterceptors(FileInterceptor('file'))
+    async createHome(@Body() createHomepayload : CreateHomeDto,@UploadedFile(new ParseFilePipe({
+        validators: []})) file: Express.Multer.File, @User() loggedInUser : TokenUserInterface){
+            console.log({createHomepayload, file});
         if(loggedInUser.type !== 'REALTOR'){
             throw new UnauthorizedException({message:"Only a REALTOR user can post a new property."})
         }
-        return this.homeService.createHome(createHomepayload, loggedInUser);
+        return this.homeService.createHome(createHomepayload, loggedInUser, file);
     }
 
     @Roles(USERTYPE.REALTOR, USERTYPE.ADMIN)

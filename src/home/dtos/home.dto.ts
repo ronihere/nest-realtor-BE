@@ -1,5 +1,5 @@
 import { BUYCATEGORY, PROPERTYTYPE } from "@prisma/client";
-import { Exclude, Expose, Type } from "class-transformer";
+import { Exclude, Expose, Transform, Type } from "class-transformer";
 import { IsArray, IsEnum, IsNotEmpty,  IsNumber, IsOptional, IsPositive, IsString,  IsUrl,  ValidateNested } from "class-validator";
 
 export class HomeResponseDto {
@@ -80,30 +80,30 @@ class Image {
 }
 
 export class CreateHomeDto{
+
     @IsString()
     @IsNotEmpty()
     address: string;
 
+    @Type(()=>Number)
     @IsNumber()
     @IsPositive()
     landSize: number;
 
+    @Type(()=>Number)
     @IsNumber()
     @IsPositive()
     numberOfBathrooms: number;
 
+    @Type(()=>Number)
     @IsNumber()
     @IsPositive()
     numberOfBedrooms: number;
 
+    @Type(()=>Number)
     @IsNumber()
     @IsPositive()
     price: number;
-
-    @IsArray()
-    @ValidateNested({each: true})
-    @Type(()=> Image)
-    images: Image[]
 
     @IsEnum(PROPERTYTYPE)
     type: PROPERTYTYPE
